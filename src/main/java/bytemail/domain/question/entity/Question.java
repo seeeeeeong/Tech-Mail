@@ -1,6 +1,5 @@
 package bytemail.domain.question.entity;
 
-import bytemail.domain.question.enums.QuestionCategory;
 import bytemail.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,9 +7,9 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Table(name = "question")
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Question extends BaseEntity {
 
     @Id
@@ -23,21 +22,10 @@ public class Question extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private QuestionCategory category;
 
-    public static Question create(
-            final String title,
-            final String content,
-            final QuestionCategory category
-    ) {
-        return Question
-                .builder()
-                .title(title)
-                .content(content)
-                .category(category)
-                .build();
+    public Question(String title, String content) {
+        this.title = title;
+        this.content = content;
     }
 
 }

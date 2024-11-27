@@ -1,37 +1,38 @@
 package bytemail.domain.admin.controller;
 
-import bytemail.domain.admin.dto.CreateQuestionRequest;
-import bytemail.domain.admin.dto.SendNoticeRequest;
-import bytemail.domain.admin.dto.UpdateQuestionRequest;
+import bytemail.domain.admin.dto.CreateQuestionReqDto;
+import bytemail.domain.admin.dto.SendNoticeReqDto;
+import bytemail.domain.admin.dto.UpdateQuestionReqDto;
 import bytemail.domain.admin.service.AdminService;
+import bytemail.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class AdminController {
 
     private final AdminService adminService;
 
     @PostMapping("/admin/question")
-    public ResponseEntity<Void> createQuestion(@RequestBody CreateQuestionRequest request) {
+    public ApiResponse<Void> createQuestion(@RequestBody CreateQuestionReqDto request) {
         adminService.createQuestion(request);
-        return ResponseEntity.noContent().build();
+        return ApiResponse.created(null);
     }
 
     @PutMapping("/admin/question")
-    public ResponseEntity<Void> updateQuestion(@RequestBody UpdateQuestionRequest request) {
+    public ApiResponse<Void> updateQuestion(@RequestBody UpdateQuestionReqDto request) {
         adminService.updateQuestion(request);
-        return ResponseEntity.noContent().build();
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/admin/notice")
-    public ResponseEntity<Void> sendNotice(@RequestBody SendNoticeRequest request) {
+    public ApiResponse<Void> sendNotice(@RequestBody SendNoticeReqDto request) {
         adminService.sendNotice(request);
-        return ResponseEntity.noContent().build();
+        return ApiResponse.success(null);
     }
+
 }

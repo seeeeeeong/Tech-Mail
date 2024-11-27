@@ -1,17 +1,19 @@
 package bytemail.domain.question.repository;
 
-import bytemail.domain.question.dto.QuestionResponse;
+import bytemail.domain.question.dto.QuestionResDto;
 import bytemail.domain.question.entity.Question;
-import bytemail.domain.question.enums.QuestionCategory;
-import bytemail.domain.subscribe.entity.Subscribe;
+import bytemail.domain.user.entity.User;
 import bytemail.global.repository.Querydsl5RepositorySupport;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.JPAExpressions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 import static bytemail.domain.question.entity.QQuestion.question;
+import static bytemail.domain.userquestion.entity.QUserQuestion.userQuestion;
+
 
 public class QuestionQueryRepositoryImpl extends Querydsl5RepositorySupport implements QuestionQueryRepository {
 
@@ -20,30 +22,55 @@ public class QuestionQueryRepositoryImpl extends Querydsl5RepositorySupport impl
     }
 
     @Override
-    public Page<QuestionResponse> findQuestions(String category, Pageable pageable) {
+    public Page<QuestionResDto> selectQuestionPageList(Pageable pageable) {
         return applyPagination(pageable,
                 queryFactory ->
                         queryFactory.select(Projections.constructor(
-                                        QuestionResponse.class,
+                                        QuestionResDto.class,
                                         question.id,
                                         question.title,
-                                        question.content,
-                                        question.category
+                                        question.content
                                 ))
-                                .from(question)
-                                .where(eqCategory(category)),
+                                .from(question),
 
                 queryFactory ->
                         queryFactory.select(question.count())
                                 .from(question)
-                                .where(eqCategory(category))
         );
     }
 
-    private BooleanExpression eqCategory(String category) {
-        if (category == null || "all".equalsIgnoreCase(category)) {
-            return null;
-        }
-        return question.category.eq(QuestionCategory.from(category));
+    @Override
+    public Optional<QuestionResDto> selectQuestionDetail(Long questionId) {
+        return Optional.ofNullable(select(Projections.constructor(
+                QuestionResDto.class,
+                question.id,
+                question.title,
+                question.content
+                ))
+                .from(question)
+                .where(question.id.eq(questionId))
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<QuestionResDto> selectQuestionListNotIn(User user) {
+        return Optional.ofNullable(
+                select(
+                        Projections.constructor(
+                                QuestionResDto.class,
+                                question.id,
+                                question.title,
+                                question.content
+                        ))
+                        .from(question)
+                        .where(question.id.notIn(
+                                JPAExpressions.select(userQuestion.question.id)
+                                        .from(userQuestion)
+                                        .where(userQuestion.user.id.eq(user.getId())
+                        )))
+                        .orderBy(question.id.asc())
+                        .limit(1)
+                        .fetchFirst()
+        );
     }
 }

@@ -1,15 +1,15 @@
 package bytemail.domain.question.controller;
 
-import bytemail.domain.question.dto.QuestionResponse;
+import bytemail.domain.question.dto.QuestionResDto;
 import bytemail.domain.question.service.QuestionService;
+import bytemail.global.response.ApiResponse;
 import bytemail.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -19,10 +19,13 @@ public class QuestionController {
     private final QuestionService questionService;
 
     @GetMapping("/question")
-    public ResponseEntity<PageResponse<QuestionResponse>> getQuestion(@RequestParam(defaultValue = "all") String category,
-                                                                      @PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        PageResponse<QuestionResponse> response = questionService.getQuestions(category, pageable);
-        return ResponseEntity.ok(response);
+    public ApiResponse<PageResponse<QuestionResDto>> getQuestionList(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ApiResponse.success(questionService.getQuestionList(pageable));
+    }
+
+    @GetMapping("/question/{questionId}")
+    public ApiResponse<QuestionResDto> getQuestionDetail(@PathVariable Long questionId) {
+        return ApiResponse.success(questionService.getQuestionDetail(questionId));
     }
 
 }
