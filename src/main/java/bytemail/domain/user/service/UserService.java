@@ -65,7 +65,7 @@ public class UserService {
     public void deleteUser(DeleteUserReqDto request) {
         User user = userRepository.selectUser(request.email(), request.token())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        user.unSubscribe();
+        user.deleteUser();
     }
 
     private String createVerifyText(String code) {

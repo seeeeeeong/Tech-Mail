@@ -1,10 +1,14 @@
 package bytemail.domain.user.entity;
 
+import bytemail.domain.question.dto.QuestionResDto;
+import bytemail.domain.question.entity.Question;
+import bytemail.domain.userquestion.entity.UserQuestion;
 import bytemail.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -26,13 +30,21 @@ public class User extends BaseEntity {
     @Column(nullable = true)
     private LocalDateTime deletedAt;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<UserQuestion> userQuestions;
+
     public User(String email) {
         this.email = email;
         this.token = UUID.randomUUID().toString();
         this.deletedAt = null;
     }
 
-    public void unSubscribe() {
+    public void deleteUser() {
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public boolean hasQuestion(Long questionId) {
+        return userQuestions.stream()
+                .anyMatch(userQuestion -> userQuestion.getQuestion().getId().equals(questionId));
     }
 }

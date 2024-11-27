@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -34,6 +35,8 @@ public class QUser extends EntityPathBase<User> {
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
+
+    public final ListPath<bytemail.domain.userquestion.entity.UserQuestion, bytemail.domain.userquestion.entity.QUserQuestion> userQuestions = this.<bytemail.domain.userquestion.entity.UserQuestion, bytemail.domain.userquestion.entity.QUserQuestion>createList("userQuestions", bytemail.domain.userquestion.entity.UserQuestion.class, bytemail.domain.userquestion.entity.QUserQuestion.class, PathInits.DIRECT2);
 
     public QUser(String variable) {
         super(User.class, forVariable(variable));

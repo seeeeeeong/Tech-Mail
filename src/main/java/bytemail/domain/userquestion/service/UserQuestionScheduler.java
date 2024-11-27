@@ -5,7 +5,6 @@ import bytemail.domain.question.service.QuestionService;
 import bytemail.domain.user.entity.User;
 import bytemail.domain.user.repository.UserRepository;
 import bytemail.domain.userquestion.dto.UserQuestionMailDto;
-import bytemail.domain.userquestion.service.UserQuestionMailService;
 import bytemail.domain.userquestion.view.UserQuestionView;
 import bytemail.global.exception.BusinessException;
 import bytemail.global.exception.ErrorCode;
@@ -18,19 +17,22 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class UserQuestionScheduler {
 
-    private final UserRepository subscribeRepository;
+    private final UserRepository userRepository;
     private final UserQuestionMailService userQuestionMailService;
     private final UserQuestionView userQuestionView;
     private final QuestionService questionService;
 
     public void sendMail() {
+        initCache();
+
         LocalDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
-        List<User> users = subscribeRepository.selectUserList(now);
+        List<User> users = userRepository.selectUserList(now);
 
         users.stream()
                 .map(this::getQuestion)
@@ -38,12 +40,19 @@ public class UserQuestionScheduler {
                 .forEach(userQuestionMailService::sendMail);
     }
 
+    private void initCache() {
+        questionService.getAllQuestionList();
+    }
+
     private UserQuestionMailDto getQuestion(User user) {
         try {
-            QuestionResDto questionResDto = questionService.getQuestionListNotIn(user);
+            List<QuestionResDto> questionResDtoList = questionService.getAllQuestionList().stream()
+                    .filter(question -> !user.hasQuestion(question.id()))
+                    .collect(Collectors.toList());
+
             String subject = "오늘의 면접 질문을 보내드려요.";
-            String text = createText(user, questionResDto);
-            return new UserQuestionMailDto(user, questionResDto.toQuestion(), subject, text);
+            String text = createText(user, questionResDtoList.get(0));
+            return new UserQuestionMailDto(user, questionResDtoList.get(0).toQuestion(), subject, text);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.QUESTION_NOT_FOUND);
         }

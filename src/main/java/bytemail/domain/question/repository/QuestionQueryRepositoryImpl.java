@@ -9,6 +9,7 @@ import com.querydsl.jpa.JPAExpressions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 import static bytemail.domain.question.entity.QQuestion.question;
@@ -72,5 +73,18 @@ public class QuestionQueryRepositoryImpl extends Querydsl5RepositorySupport impl
                         .limit(1)
                         .fetchFirst()
         );
+    }
+
+    @Override
+    public List<QuestionResDto> findAllQuestions() {
+        return select(
+                Projections.constructor(
+                        QuestionResDto.class,
+                        question.id,
+                        question.title,
+                        question.content
+                ))
+                .from(question)
+                .fetch();
     }
 }

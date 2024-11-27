@@ -7,10 +7,13 @@ import bytemail.global.exception.ErrorCode;
 import bytemail.global.exception.notfound.EntityNotFoundException;
 import bytemail.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +32,8 @@ public class QuestionService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.QUESTION_NOT_FOUND));
     }
 
-    public QuestionResDto getQuestionListNotIn(User user) {
-        return questionRepository.selectQuestionListNotIn(user).orElseThrow(() -> new EntityNotFoundException(ErrorCode.QUESTION_NOT_FOUND));
+    @Cacheable(value = "allQuestions")
+    public List<QuestionResDto> getAllQuestionList() {
+        return questionRepository.findAllQuestions();
     }
 }
