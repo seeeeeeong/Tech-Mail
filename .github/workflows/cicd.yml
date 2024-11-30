@@ -41,6 +41,7 @@ jobs:
 
       - name: Build Docker
         run: docker build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/techmail .
+
       - name: Push Docker
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/techmail:latest
 
@@ -55,23 +56,25 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}/actuator/health")
-          echo $STATUS
+          # Check health status on 8080 port
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}:8080/actuator/health")
+          echo "Health check status on 8080: $STATUS"
+          
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=blue
+            CURRENT_PORT=BLUE
           else
-            CURRENT_UPSTREAM=green
+            CURRENT_PORT=GREEN
           fi
-          echo CURRENT_UPSTREAM=$CURRENT_UPSTREAM >> $GITHUB_ENV
-          if [ $CURRENT_UPSTREAM = blue ]; then
-            echo "CURRENT_PORT=8080" >> $GITHUB_ENV
+          
+          echo "CURRENT_PORT=$CURRENT_PORT" >> $GITHUB_ENV
+
+          # Set environment variables based on CURRENT_PORT
+          if [ $CURRENT_PORT = BLUE ]; then
             echo "STOPPED_PORT=8081" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
           else 
-            echo "CURRENT_PORT=8081" >> $GITHUB_ENV
             echo "STOPPED_PORT=8080" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
-          fi
 
       - name: Docker compose
         uses: appleboy/ssh-action@master
@@ -81,7 +84,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
+            # Pull latest Docker image
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/techmail:latest
+            # Start the Docker container with the proper compose file based on target upstream (blue or green)
             sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
 
       - name: Check deploy server URL
@@ -91,7 +96,6 @@ jobs:
           max-attempts: 5
           retry-delay: 20s
 
-
       - name: Change nginx upstream
         uses: appleboy/ssh-action@master
         with:
@@ -100,7 +104,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
+            # Update nginx config to point to the new upstream
             sudo docker exec -i nginxserver bash -c 'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
+
       - name: Stop current server
         uses: appleboy/ssh-action@master
         with:
@@ -109,5 +115,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
+            # Stop and remove the currently running container
             sudo docker stop ${{env.CURRENT_UPSTREAM}}
             sudo docker rm ${{env.CURRENT_UPSTREAM}}
