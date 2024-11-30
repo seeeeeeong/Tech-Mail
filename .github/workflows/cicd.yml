@@ -85,11 +85,9 @@ jobs:
             sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
 
       - name: Check deploy server URL
-        uses: jtalk/url-health-check-action@v3
-        with:
-          url: http://${{ secrets.TECHMAIL_SERVER_IP }}:${{env.STOPPED_PORT}}/actuator/health
-          max-attempts: 5
-          retry-delay: 20s
+        run: |
+          echo "Checking deploy server URL..."
+          curl --retry 5 --retry-delay 20 -I http://${{ secrets.TECHMAIL_SERVER_IP }}:${{env.STOPPED_PORT}}/actuator/health
 
       - name: Change nginx upstream
         uses: appleboy/ssh-action@master
