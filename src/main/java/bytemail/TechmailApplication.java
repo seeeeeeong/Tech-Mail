@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class TechmailApplication {
 
 	public static void main(String[] args) {
+		System.setProperty("spring.config.name", "application");
 		SpringApplication.run(TechmailApplication.class, args);
 	}
 
