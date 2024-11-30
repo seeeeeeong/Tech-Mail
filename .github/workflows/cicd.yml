@@ -56,23 +56,21 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          # Fail on errors being ignored
-          set +e  # Disable immediate exit on errors
-          
           # Check health status on 8080 port
           STATUS=$(curl -o /dev/null -w "%{http_code}" -s "http://${{ secrets.TECHMAIL_SERVER_IP }}:8080/actuator/health")
           echo "Health check status on 8080: $STATUS"
           
+          # If the status is 200, BLUE is up, else if the status is 000 (unable to connect), GREEN is up
           if [ "$STATUS" -eq 200 ]; then
             CURRENT_PORT=BLUE
-          else
+          elif [ "$STATUS" -eq 000 ]; then
             echo "Health check failed or unable to connect. Status code: $STATUS"
+            CURRENT_PORT=GREEN
+          else
+            echo "Health check failed or unexpected status code: $STATUS"
             CURRENT_PORT=GREEN
           fi
           
-          # Enable error exit handling again
-          set -e  # Re-enable immediate exit on errors
-
           echo "CURRENT_PORT=$CURRENT_PORT" >> $GITHUB_ENV
 
           # Set environment variables based on CURRENT_PORT
