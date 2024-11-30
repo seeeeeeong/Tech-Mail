@@ -55,7 +55,7 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}/env")
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}/actuator/health")
           echo $STATUS
           if [ $STATUS = 200 ]; then
             CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.TECHMAIL_SERVER_IP }}/env")
@@ -87,7 +87,7 @@ jobs:
       - name: Check deploy server URL
         uses: jtalk/url-health-check-action@v3
         with:
-          url: http://${{ secrets.TECHMAIL_SERVER_IP }}:${{env.STOPPED_PORT}}/env
+          url: http://${{ secrets.TECHMAIL_SERVER_IP }}:${{env.STOPPED_PORT}}/actuator/health
           max-attempts: 5
           retry-delay: 20s
 
