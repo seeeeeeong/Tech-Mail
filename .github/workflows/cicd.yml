@@ -11,11 +11,8 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     env:
-      profile: blue
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
@@ -50,7 +47,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     env:
-      profile: blue
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
@@ -75,7 +71,6 @@ jobs:
             echo "STOPPED_PORT=8080" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
           fi
-
 
       - name: Docker compose
         uses: appleboy/ssh-action@master
