@@ -3,21 +3,37 @@ spring:
     import: optional:file:.env[.properties]
   profiles:
     active: ${profile}
+    group:
+      blue: blue, common
+      green: green, common
+
+server:
+  env: blue
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: common
+
+serverName: common
 
 ---
 
 server:
   shutdown: graceful
+  port: 8080
 
 spring:
   config:
     activate:
-      on-profile: dev
+      on-profile: blue
 
   lifecycle:
     timeout-per-shutdown-phase: 30s
   datasource:
-    url: jdbc:mysql://${DB_ENDPOINT}/${DB_NAME}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://database-bytecode.cne4ko2mylsm.ap-northeast-2.rds.amazonaws.com:3306/bytecode?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     driverClassName: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
@@ -44,3 +60,51 @@ spring:
           timeout: 5000
           starttls:
             enable: true
+
+serverName: blue_server
+
+---
+
+server:
+  shutdown: graceful
+  port: 8081
+
+spring:
+  config:
+    activate:
+      on-profile: green
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  datasource:
+    url: jdbc:mysql://database-bytecode.cne4ko2mylsm.ap-northeast-2.rds.amazonaws.com:3306/bytecode?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        auto_quote_keyword: true
+        format_sql: true
+    show-sql: true
+    defer-datasource-initialization: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          timeout: 5000
+          starttls:
+            enable: true
+
+serverName: green_server
+
+---
