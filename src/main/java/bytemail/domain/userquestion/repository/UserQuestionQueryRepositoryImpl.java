@@ -26,7 +26,8 @@ public class UserQuestionQueryRepositoryImpl extends Querydsl5RepositorySupport 
                                         QuestionResDto.class,
                                         question.id,
                                         question.title,
-                                        question.content
+                                        question.content,
+                                        question.category
                                 ))
                                 .from(userQuestion)
                                 .join(user).on(userQuestion.user.eq(user))

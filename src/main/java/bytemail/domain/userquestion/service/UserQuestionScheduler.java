@@ -1,6 +1,7 @@
 package bytemail.domain.userquestion.service;
 
 import bytemail.domain.question.dto.QuestionResDto;
+import bytemail.domain.question.entity.QuestionCategory;
 import bytemail.domain.question.service.QuestionService;
 import bytemail.domain.user.entity.User;
 import bytemail.domain.user.repository.UserRepository;
@@ -41,16 +42,16 @@ public class UserQuestionScheduler {
     }
 
     private void initCache() {
-        questionService.getAllQuestionList();
+        questionService.getAllByCategory(QuestionCategory.BACKEND.name());
     }
 
     private UserQuestionMailDto getQuestion(User user) {
         try {
-            List<QuestionResDto> questionResDtoList = questionService.getAllQuestionList().stream()
+            List<QuestionResDto> questionResDtoList = questionService.getAllByCategory(user.getCategory().name()).stream()
                     .filter(question -> !user.hasQuestion(question.id()))
                     .collect(Collectors.toList());
 
-            String subject = "오늘의 면접 질문을 보내드려요.";
+            String subject = "오늘의 지식을 보내드려요.";
             String text = createText(user, questionResDtoList.get(0));
             return new UserQuestionMailDto(user, questionResDtoList.get(0).toQuestion(), subject, text);
         } catch (Exception e) {

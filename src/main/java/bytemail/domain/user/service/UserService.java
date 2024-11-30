@@ -2,6 +2,7 @@ package bytemail.domain.user.service;
 
 import bytemail.domain.mail.dto.MailDto;
 import bytemail.domain.mail.service.MailService;
+import bytemail.domain.question.entity.QuestionCategory;
 import bytemail.domain.user.dto.SendVerifyCodeReqDto;
 import bytemail.domain.user.dto.CreateUserReqDto;
 import bytemail.domain.user.dto.DeleteUserReqDto;
@@ -51,7 +52,7 @@ public class UserService {
         boolean isUserExists = userRepository.isUserExists(request.email());
 
          if (!isUserExists) {
-             User user = new User(request.email());
+             User user = new User(request.email(), QuestionCategory.from(request.category()));
              userRepository.save(user);
             }
 

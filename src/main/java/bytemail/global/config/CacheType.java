@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum CacheType {
 
-    QUESTION("allQuestions", 1L);
+    QUESTION("questions", 1L);
 
     private final String name;
     private final Long expiredAfterWrite;

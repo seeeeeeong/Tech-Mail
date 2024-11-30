@@ -2,6 +2,7 @@ package bytemail.domain.question.repository;
 
 import bytemail.domain.question.dto.QuestionResDto;
 import bytemail.domain.question.entity.Question;
+import bytemail.domain.question.entity.QuestionCategory;
 import bytemail.domain.user.entity.User;
 import bytemail.global.repository.Querydsl5RepositorySupport;
 import com.querydsl.core.types.Projections;
@@ -30,7 +31,8 @@ public class QuestionQueryRepositoryImpl extends Querydsl5RepositorySupport impl
                                         QuestionResDto.class,
                                         question.id,
                                         question.title,
-                                        question.content
+                                        question.content,
+                                        question.category
                                 ))
                                 .from(question),
 
@@ -46,7 +48,8 @@ public class QuestionQueryRepositoryImpl extends Querydsl5RepositorySupport impl
                 QuestionResDto.class,
                 question.id,
                 question.title,
-                question.content
+                question.content,
+                question.category
                 ))
                 .from(question)
                 .where(question.id.eq(questionId))
@@ -61,7 +64,8 @@ public class QuestionQueryRepositoryImpl extends Querydsl5RepositorySupport impl
                                 QuestionResDto.class,
                                 question.id,
                                 question.title,
-                                question.content
+                                question.content,
+                                question.category
                         ))
                         .from(question)
                         .where(question.id.notIn(
@@ -82,9 +86,26 @@ public class QuestionQueryRepositoryImpl extends Querydsl5RepositorySupport impl
                         QuestionResDto.class,
                         question.id,
                         question.title,
-                        question.content
+                        question.content,
+                        question.category
                 ))
                 .from(question)
+                .fetch();
+    }
+
+    @Override
+    public List<QuestionResDto> selectQuestionListByCategory(String category) {
+        return select(
+                Projections.constructor(
+                        QuestionResDto.class,
+                        question.id,
+                        question.title,
+                        question.content,
+                        question.category
+                ))
+                .from(question)
+                .where(question.category.eq(QuestionCategory.from(category)))
+                .orderBy(question.id.asc())
                 .fetch();
     }
 }

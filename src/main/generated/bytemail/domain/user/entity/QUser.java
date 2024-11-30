@@ -22,6 +22,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final bytemail.global.entity.QBaseEntity _super = new bytemail.global.entity.QBaseEntity(this);
 
+    public final EnumPath<bytemail.domain.question.entity.QuestionCategory> category = createEnum("category", bytemail.domain.question.entity.QuestionCategory.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 

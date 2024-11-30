@@ -2,7 +2,6 @@ package bytemail.domain.question.service;
 
 import bytemail.domain.question.dto.QuestionResDto;
 import bytemail.domain.question.repository.QuestionRepository;
-import bytemail.domain.user.entity.User;
 import bytemail.global.exception.ErrorCode;
 import bytemail.global.exception.notfound.EntityNotFoundException;
 import bytemail.global.response.PageResponse;
@@ -32,8 +31,9 @@ public class QuestionService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.QUESTION_NOT_FOUND));
     }
 
-    @Cacheable(value = "allQuestions")
-    public List<QuestionResDto> getAllQuestionList() {
-        return questionRepository.findAllQuestions();
+
+    @Cacheable(key = "#category", cacheNames = {"questions"})
+    public List<QuestionResDto> getAllByCategory(String category) {
+        return questionRepository.selectQuestionListByCategory(category);
     }
 }

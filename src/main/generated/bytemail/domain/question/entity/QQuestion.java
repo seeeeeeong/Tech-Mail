@@ -21,6 +21,8 @@ public class QQuestion extends EntityPathBase<Question> {
 
     public final bytemail.global.entity.QBaseEntity _super = new bytemail.global.entity.QBaseEntity(this);
 
+    public final EnumPath<QuestionCategory> category = createEnum("category", QuestionCategory.class);
+
     public final StringPath content = createString("content");
 
     //inherited

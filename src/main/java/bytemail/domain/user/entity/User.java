@@ -2,6 +2,7 @@ package bytemail.domain.user.entity;
 
 import bytemail.domain.question.dto.QuestionResDto;
 import bytemail.domain.question.entity.Question;
+import bytemail.domain.question.entity.QuestionCategory;
 import bytemail.domain.userquestion.entity.UserQuestion;
 import bytemail.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -24,6 +25,10 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private QuestionCategory category;
+
     @Column(nullable = false, unique = true)
     private String token;
 
@@ -33,8 +38,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<UserQuestion> userQuestions;
 
-    public User(String email) {
+    public User(String email, QuestionCategory category) {
         this.email = email;
+        this.category = category;
         this.token = UUID.randomUUID().toString();
         this.deletedAt = null;
     }

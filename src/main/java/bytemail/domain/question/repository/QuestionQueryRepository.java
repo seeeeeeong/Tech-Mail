@@ -17,4 +17,6 @@ public interface QuestionQueryRepository {
 
     List<QuestionResDto> findAllQuestions();
 
+    List<QuestionResDto> selectQuestionListByCategory(String category);
+
 }

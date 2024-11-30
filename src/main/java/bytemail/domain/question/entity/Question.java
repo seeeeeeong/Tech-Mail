@@ -22,10 +22,14 @@ public class Question extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private QuestionCategory category;
 
-    public Question(String title, String content) {
+    public Question(String title, String content, QuestionCategory category) {
         this.title = title;
         this.content = content;
+        this.category = category;
     }
 
 }
