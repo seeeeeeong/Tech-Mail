@@ -58,7 +58,7 @@ jobs:
           STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}/actuator/health")
           echo $STATUS
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.TECHMAIL_SERVER_IP }}/env")
+            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.TECHMAIL_SERVER_IP }}/actuator/health")
           else
             CURRENT_UPSTREAM=green
           fi
@@ -85,9 +85,11 @@ jobs:
             sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
 
       - name: Check deploy server URL
-        run: |
-          echo "Checking deploy server URL..."
-          curl --retry 5 --retry-delay 20 -I http://${{ secrets.TECHMAIL_SERVER_IP }}:${{env.STOPPED_PORT}}/actuator/health
+        uses: jtalk/url-health-check-action@v3
+        with:
+          url: http://${{ secrets.TECHMAIL_SERVER_IP }}:${{env.STOPPED_PORT}}/actuator/health
+          max-attempts: 5
+          retry-delay: 20s
 
       - name: Change nginx upstream
         uses: appleboy/ssh-action@master
