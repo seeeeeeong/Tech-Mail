@@ -55,10 +55,10 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}/actuator/health")
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}:8080/actuator/health")
           echo $STATUS
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.TECHMAIL_SERVER_IP }}/actuator/health")
+            CURRENT_UPSTREAM=blue
           else
             CURRENT_UPSTREAM=green
           fi
