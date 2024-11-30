@@ -31,7 +31,6 @@ jobs:
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
         with:
           arguments: build
-          # run : ./gradlew clean build --exclude-task test
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -56,21 +55,19 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          # Check health status on 8080 port
-          STATUS=$(curl -o /dev/null -w "%{http_code}" -s "http://${{ secrets.TECHMAIL_SERVER_IP }}:8080/actuator/health")
-          echo "Health check status on 8080: $STATUS"
-          
-          # If the status is 200, BLUE is up, else if the status is 000 (unable to connect), GREEN is up
-          if [ "$STATUS" -eq 200 ]; then
+          # SSH 접속 후 docker ps 명령어로 포트 확인
+          DOCKER_PORTS=$(ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ubuntu@${{ secrets.TECHMAIL_SERVER_IP }} "docker ps --format '{{.Ports}}'")
+
+          # docker ps 출력 결과에서 포트가 8080 또는 8081인지 확인
+          if echo "$DOCKER_PORTS" | grep -q '8080'; then
             CURRENT_PORT=BLUE
-          elif [ "$STATUS" -eq 000 ]; then
-            echo "Health check failed or unable to connect. Status code: $STATUS"
+          elif echo "$DOCKER_PORTS" | grep -q '8081'; then
             CURRENT_PORT=GREEN
           else
-            echo "Health check failed or unexpected status code: $STATUS"
+            echo "No known ports found, defaulting to GREEN."
             CURRENT_PORT=GREEN
           fi
-          
+
           echo "CURRENT_PORT=$CURRENT_PORT" >> $GITHUB_ENV
 
           # Set environment variables based on CURRENT_PORT
