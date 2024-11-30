@@ -55,10 +55,10 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}/health")
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}/env")
           echo $STATUS
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.TECHMAIL_SERVER_IP }}/health")
+            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.TECHMAIL_SERVER_IP }}/env")
           else
             CURRENT_UPSTREAM=green
           fi
