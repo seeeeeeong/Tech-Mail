@@ -31,6 +31,7 @@ jobs:
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
         with:
           arguments: build
+          # run : ./gradlew clean build --exclude-task test
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -40,7 +41,6 @@ jobs:
 
       - name: Build Docker
         run: docker build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/techmail .
-
       - name: Push Docker
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/techmail:latest
 
@@ -55,28 +55,23 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          # SSH 접속 후 docker ps 명령어로 포트 확인
-          DOCKER_PORTS=$(ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_KEY }} ubuntu@${{ secrets.TECHMAIL_SERVER_IP }} "docker ps --format '{{.Ports}}'")
-
-          # docker ps 출력 결과에서 포트가 8080 또는 8081인지 확인
-          if echo "$DOCKER_PORTS" | grep -q '8080'; then
-            CURRENT_PORT=BLUE
-          elif echo "$DOCKER_PORTS" | grep -q '8081'; then
-            CURRENT_PORT=GREEN
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.TECHMAIL_SERVER_IP }}/health")
+          echo $STATUS
+          if [ $STATUS = 200 ]; then
+            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.TECHMAIL_SERVER_IP }}/health")
           else
-            echo "No known ports found, defaulting to GREEN."
-            CURRENT_PORT=GREEN
+            CURRENT_UPSTREAM=green
           fi
-
-          echo "CURRENT_PORT=$CURRENT_PORT" >> $GITHUB_ENV
-
-          # Set environment variables based on CURRENT_PORT
-          if [ $CURRENT_PORT = BLUE ]; then
+          echo CURRENT_UPSTREAM=$CURRENT_UPSTREAM >> $GITHUB_ENV
+          if [ $CURRENT_UPSTREAM = blue ]; then
+            echo "CURRENT_PORT=8080" >> $GITHUB_ENV
             echo "STOPPED_PORT=8081" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
           else 
+            echo "CURRENT_PORT=8081" >> $GITHUB_ENV
             echo "STOPPED_PORT=8080" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
+          fi
 
       - name: Docker compose
         uses: appleboy/ssh-action@master
@@ -86,9 +81,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
-            # Pull latest Docker image
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/techmail:latest
-            # Start the Docker container with the proper compose file based on target upstream (blue or green)
             sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
 
       - name: Check deploy server URL
@@ -106,9 +99,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
-            # Update nginx config to point to the new upstream
             sudo docker exec -i nginxserver bash -c 'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
-
       - name: Stop current server
         uses: appleboy/ssh-action@master
         with:
@@ -117,6 +108,5 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
-            # Stop and remove the currently running container
             sudo docker stop ${{env.CURRENT_UPSTREAM}}
             sudo docker rm ${{env.CURRENT_UPSTREAM}}
