@@ -22,7 +22,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 )
                 .allowedOrigins(
                         "http://localhost:8080",
-                        "http://localhost:3000"
+                        "http://localhost:3000",
+                        "https://www.tech-mail.site",
+                        "https://tech-mail.site"
                 );
     }
 }
