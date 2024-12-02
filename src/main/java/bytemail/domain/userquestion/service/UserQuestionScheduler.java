@@ -10,6 +10,7 @@ import bytemail.domain.userquestion.view.UserQuestionView;
 import bytemail.global.exception.BusinessException;
 import bytemail.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class UserQuestionScheduler {
     private final UserQuestionView userQuestionView;
     private final QuestionService questionService;
 
+    @Scheduled(cron = "0 0 7 ? * WED", zone = "Asia/Seoul")
     public void sendMail() {
         initCache();
 

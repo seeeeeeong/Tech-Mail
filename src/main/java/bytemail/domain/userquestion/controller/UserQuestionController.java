@@ -26,8 +26,8 @@ public class UserQuestionController {
         return ApiResponse.success(userQuestionService.getUserQuestionList(email, pageable));
     }
 
-    @PostMapping("/test")
-    public ApiResponse<Void> test() {
+    @PostMapping("/send-mail-scheduling")
+    public ApiResponse<Void> sendMailScheduling() {
         userQuestionScheduler.sendMail();
         return ApiResponse.success(null);
     }
