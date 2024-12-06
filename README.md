@@ -20,7 +20,7 @@
 
 'Tech-Mail'은 매주 정해진 시간에 개발 지식을 제공하는 이메일 기반 서비스입니다.
 
-[✉️ 홈페이지 ✉️](https://www.tech-mail.site)
+[✉️ 홈페이지 ](https://www.tech-mail.site)
 
 ![프로젝트 소개](https://github.com/user-attachments/assets/18fee9fc-4aab-409e-8955-9fac0a24b118)
 
