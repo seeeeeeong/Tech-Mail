@@ -1,7 +1,6 @@
 <div align="center">
   <br>
   <h2> Tech-Mail </h2>
-  <h1> ✉️ 이메일 개발 큐레이션 서비스 </h1>
   <strong>API 서버 레포지토리</strong>
 </div>
 <br>
